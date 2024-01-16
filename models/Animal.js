@@ -10,9 +10,6 @@ const animalSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        pics: {
-            type: [String]
-        }
     },
     {
         timestamps: true

@@ -16,7 +16,11 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true
-    }
+    },
+    animals: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Animal'
+    },
 })
 
 module.exports = mongoose.model('User', userSchema)

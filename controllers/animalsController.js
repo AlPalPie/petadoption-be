@@ -1,5 +1,19 @@
 const Animal = require('../models/Animal')
-const User = require('../models/User')
+const Image = require('../models/Image')
+const fs = require('fs')
+
+
+// Helper function to delete files from filesystem
+const fsDelete = (path) => {
+    fs.unlink(path, (err) => {
+        if (err) {
+            console.log('Error deleting file:', err)
+            return
+        }
+        console.log(`File ${path} successfully deleted.`)
+    })
+}
+
 
 // @desc Get all animals 
 // @route GET /animals
@@ -22,27 +36,40 @@ const getAllAnimals = async (req, res) => {
 // @route POST /animals
 // @access Private
 const createNewAnimal = async (req, res) => {
-    const { name, description, pics } = req.body
+    const { name, description, caption } = req.body
 
     // Confirm data
     if (!name || !description) {
+        if (req.file) { fsDelete(req.file) }
         return res.status(400).json({ message: 'Name and description fields are required' })
     }
 
     // Check for duplicate name
-    // FIXME: what does exec() do?
     const duplicate = await Animal.findOne({ name }).collation({ locale: 'en', strength: 2 }).lean().exec()
 
     if (duplicate) {
+        if (req.file) { fsDelete(req.file) }
         return res.status(409).json({ message: 'Duplicate animal name' })
     }
 
     // Create and store the new animal 
-    const animal = await Animal.create({ name, description, pics })
+    const animal = await Animal.create({ name, description })
+    
 
-    if (animal) { // Created 
-        return res.status(201).json({ message: 'New animal created' })
+    let image;
+    if (req.file) {
+        // Create and store the new image
+        image = await Image.create( { animal: animal._id, path: req.file.path, caption })
     } else {
+        image = null
+    }
+
+    if (animal && image) { // Created 
+        return res.status(201).json({ message: 'New animal created with image.' })
+    } else if (animal) {
+        return res.status(201).json({ message: 'New animal created.' })
+    } else {
+        if (req.file) { fsDelete(req.file) }
         return res.status(400).json({ message: 'Invalid animal data received' })
     }
 
@@ -52,7 +79,7 @@ const createNewAnimal = async (req, res) => {
 // @route PATCH /animals
 // @access Private
 const updateAnimal = async (req, res) => {
-    const { name, description, pics } = req.body
+    const { name, description } = req.body
 
     // Confirm data
     if (!name || !description) {
@@ -68,11 +95,10 @@ const updateAnimal = async (req, res) => {
 
     animal.name = name
     animal.description = description
-    animal.pics = pics
 
     const updatedAnimal = await animal.save()
 
-    res.json(`Animal '${updatedAnimal.name}' updated`)
+    res.json(`Animal '${animal.name}' updated`)
 }
 
 // @desc Delete a animal
@@ -87,7 +113,7 @@ const deleteAnimal = async (req, res) => {
     }
 
     // Confirm animal exists to delete 
-    const animal = await Animal.findOne({ name }).lean()/exec()
+    const animal = await Animal.findOne({ name }).exec()
 
     if (!animal) {
         return res.status(400).json({ message: 'Animal not found' })
@@ -95,7 +121,7 @@ const deleteAnimal = async (req, res) => {
 
     const result = await animal.deleteOne()
 
-    const reply = `Animal '${result.name}' with ID ${result._id} deleted`
+    const reply = `Animal '${animal.name}' with ID ${animal._id} deleted`
 
     res.json(reply)
 }

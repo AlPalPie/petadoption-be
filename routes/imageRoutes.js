@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const animalsController = require('../controllers/animalsController')
+const imagesController = require('../controllers/imagesController')
 const verifyJWT = require('../middleware/verifyJWT')
 const multer = require('multer')
 const path = require('path')
@@ -15,7 +15,6 @@ const storage = multer.diskStorage( {
         cb(null, 'public/img/uploads')
     },
     filename: (req, file, cb) => {
-        console.log("multer file storage")
         console.log(file)
         cb(null, Date.now() + path.extname(file.originalname))
     }
@@ -25,9 +24,12 @@ const upload = multer({storage: storage})
 
 
 router.route('/')
-    .get(animalsController.getAllAnimals)
-    .post(upload.single('multer-image'), animalsController.createNewAnimal)
-    .patch(upload.single('multer-image'), animalsController.updateAnimal)
-    .delete(animalsController.deleteAnimal)
+    .get(imagesController.getAllImages)
+    .post(upload.single('multer-image'), imagesController.createNewImage)
+    .patch(imagesController.updateImage)
+    .delete(imagesController.deleteImage)
+
+router.route('/:imageID')
+    .get(imagesController.getImageFile)
 
 module.exports = router

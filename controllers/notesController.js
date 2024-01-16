@@ -109,6 +109,7 @@ const deleteNote = async (req, res) => {
 
     const result = await note.deleteOne()
 
+    // FIXME: looks like deleteOne() does not return the objects properties that were deleted like the tutorial expects - Learning Exercise
     const reply = `Note '${result.title}' with ID ${result._id} deleted`
 
     res.json(reply)
