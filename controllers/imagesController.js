@@ -46,7 +46,7 @@ const getImageFile = async (req, res) => {
     }
 
     const options = {
-        root: path.join(__dirname, '/', '..')
+        root: path.join(__dirname, '..')
     }
     res.sendFile(image.path, options)
 }
@@ -63,13 +63,16 @@ const createNewImage = async (req, res) => {
         return res.status(400).json({ message: 'animalID and caption fields and image file are required' })
     }
 
+    const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
+    console.log(`urlPath = ${urlPath}`)
+
     // Create and store the new image
-    const image = await Image.create( { animal: animalID, path: req.file.path, caption })
+    const image = await Image.create( { animal: animalID, path: urlPath, caption })
 
     if (image) { // Created 
         return res.status(201).json({ message: 'New image created' })
     } else {
-        if (req.file) { fsDelete(req.file) }
+        if (req.file) { fsDelete(req.file.path) }
         return res.status(400).json({ message: 'Invalid image data received' })
     }
 
@@ -124,7 +127,7 @@ const deleteImage = async (req, res) => {
     }
 
     const id = image._id
-    fsDelete(image.path)
+    fsDelete(path.join('public', image.path))
     const result = await image.deleteOne()
 
     const reply = `Image with ID ${id} deleted`

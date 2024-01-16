@@ -40,7 +40,7 @@ const createNewAnimal = async (req, res) => {
 
     // Confirm data
     if (!name || !description) {
-        if (req.file) { fsDelete(req.file) }
+        if (req.file) { fsDelete(req.file.path) }
         return res.status(400).json({ message: 'Name and description fields are required' })
     }
 
@@ -48,7 +48,7 @@ const createNewAnimal = async (req, res) => {
     const duplicate = await Animal.findOne({ name }).collation({ locale: 'en', strength: 2 }).lean().exec()
 
     if (duplicate) {
-        if (req.file) { fsDelete(req.file) }
+        if (req.file) { fsDelete(req.file.path) }
         return res.status(409).json({ message: 'Duplicate animal name' })
     }
 
@@ -58,8 +58,9 @@ const createNewAnimal = async (req, res) => {
 
     let image;
     if (req.file) {
+        const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
         // Create and store the new image
-        image = await Image.create( { animal: animal._id, path: req.file.path, caption })
+        image = await Image.create( { animal: animal._id, path: urlPath, caption })
     } else {
         image = null
     }
@@ -69,7 +70,7 @@ const createNewAnimal = async (req, res) => {
     } else if (animal) {
         return res.status(201).json({ message: 'New animal created.' })
     } else {
-        if (req.file) { fsDelete(req.file) }
+        if (req.file) { fsDelete(req.file.path) }
         return res.status(400).json({ message: 'Invalid animal data received' })
     }
 
