@@ -1,6 +1,7 @@
 const Animal = require('../models/Animal')
 const Image = require('../models/Image')
 const fs = require('fs')
+const path = require('path')
 
 
 // Helper function to delete files from filesystem

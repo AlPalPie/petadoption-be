@@ -29,7 +29,4 @@ router.route('/')
     .patch(imagesController.updateImage)
     .delete(imagesController.deleteImage)
 
-router.route('/:imageID')
-    .get(imagesController.getImageFile)
-
 module.exports = router

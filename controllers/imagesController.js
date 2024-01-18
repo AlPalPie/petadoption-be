@@ -33,25 +33,6 @@ const getAllImages = async (req, res) => {
 }
 
 
-// @desc Get all images 
-// @route GET /images/:imageID
-// @access Private
-const getImageFile = async (req, res) => {
-    const imageID = req.params.imageID
-    const image = await Image.findById(imageID).exec()
-
-    // If no images 
-    if (!image) {
-        return res.status(400).json({ message: 'No image found' })
-    }
-
-    const options = {
-        root: path.join(__dirname, '..')
-    }
-    res.sendFile(image.path, options)
-}
-
-
 // @desc Create new image
 // @route POST /images
 // @access Private
@@ -137,7 +118,6 @@ const deleteImage = async (req, res) => {
 
 module.exports = {
     getAllImages,
-    getImageFile,
     createNewImage,
     updateImage,
     deleteImage
