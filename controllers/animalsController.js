@@ -138,11 +138,27 @@ const deleteAnimal = async (req, res) => {
         return res.status(400).json({ message: 'Animal not found' })
     }
 
-    const result = await animal.deleteOne()
+    // Find all images associated with this animal
+    const images = await Image.find({ animal: animal._id }).exec()
 
-    const reply = `Animal '${animal.name}' with ID ${animal._id} deleted`
+    if (images) {
+        for (const image of images) {
+            fsDelete(path.join('public', image.path))
+            await image.deleteOne()
+        }
+    }
 
-    res.json(reply)
+    // Delete animal from database
+    await animal.deleteOne()
+
+    if (animal && images) { // Created 
+        return res.status(200).json({ message: `Animal (${animal.name}) deleted along with its images.` })
+    } else if (animal) {
+        return res.status(200).json({ message: `Animal (${animal.name}) deleted.` })
+    } else {
+        if (req.file) { fsDelete(req.file.path) }
+        return res.status(400).json({ message: 'Invalid animal data received' })
+    }
 }
 
 module.exports = {

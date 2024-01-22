@@ -94,7 +94,6 @@ const updateImage = async (req, res) => {
 const deleteImage = async (req, res) => {
     const { imageID } = req.body
 
-    console.log(imageID)
     // Confirm data
     if (!imageID) {
         return res.status(400).json({ message: 'Image ID required' })
