@@ -81,10 +81,11 @@ const createNewAnimal = async (req, res) => {
 // @route PATCH /animals
 // @access Private
 const updateAnimal = async (req, res) => {
-    const { name, description } = req.body
+    const { id, name, description } = req.body
 
     // Confirm data
     if (!name || !description) {
+        if (req.file) { fsDelete(req.file.path) }
         return res.status(400).json({ message: 'Name and description fields are required' })
     }
 
@@ -95,12 +96,28 @@ const updateAnimal = async (req, res) => {
         return res.status(400).json({ message: 'Animal not found' })
     }
 
+    let image;
+    if (req.file) {
+        const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
+        // Create and store the new image
+        image = await Image.create( { animal: animal._id, path: urlPath, caption: '' })
+    } else {
+        image = null
+    }
+
     animal.name = name
     animal.description = description
 
     const updatedAnimal = await animal.save()
 
-    res.json(`Animal '${animal.name}' updated`)
+    if (updatedAnimal && image) { // Created 
+        return res.status(200).json({ message: `Animal (${updatedAnimal.name}) updated with new image.` })
+    } else if (updatedAnimal) {
+        return res.status(200).json({ message: `Animal (${updatedAnimal.name}) updated.` })
+    } else {
+        if (req.file) { fsDelete(req.file.path) }
+        return res.status(400).json({ message: 'Invalid animal data received' })
+    }
 }
 
 // @desc Delete a animal
@@ -111,7 +128,7 @@ const deleteAnimal = async (req, res) => {
 
     // Confirm data
     if (!name) {
-        return res.status(400).json({ message: 'Animal ID required' })
+        return res.status(400).json({ message: 'Animal name required' })
     }
 
     // Confirm animal exists to delete 
