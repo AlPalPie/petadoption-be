@@ -63,50 +63,48 @@ const createNewImage = async (req, res) => {
 // @route PATCH /images
 // @access Private
 const updateImage = async (req, res) => {
-    const { imageID, animalID, caption } = req.body
+    const { id, caption } = req.body
 
     // Confirm data
-    if (!imageID) {
-        return res.status(400).json({ message: 'imageID field is required.' })
+    if (!id) {
+        return res.status(400).json({ message: 'id field is required.' })
     }
-    if (!animalID && !caption) {
-        return res.status(400).json({ message: 'One of animalID or caption fields are required.'})
+    if (!caption) {
+        return res.status(400).json({ message: 'caption field is required.'})
     }
 
     // Confirm image exists to update
-    const image = await Image.findById(imageID).exec()
+    const image = await Image.findById(id).exec()
 
     if (!image) {
         return res.status(400).json({ message: 'Image not found' })
     }
 
-    if (animalID) image.animal = animalID
     if (caption) image.caption = caption
 
     const updatedImage = await image.save()
 
-    res.json(`Image with ID ${imageID} updated`)
+    res.json(`Image with ID ${id} updated`)
 }
 
 // @desc Delete a image
 // @route DELETE /images
 // @access Private
 const deleteImage = async (req, res) => {
-    const { imageID } = req.body
+    const { id } = req.body
 
     // Confirm data
-    if (!imageID) {
+    if (!id) {
         return res.status(400).json({ message: 'Image ID required' })
     }
 
     // Confirm image exists to delete 
-    const image = await Image.findById(imageID).exec()
+    const image = await Image.findById(id).exec()
 
     if (!image) {
         return res.status(400).json({ message: 'Image not found' })
     }
 
-    const id = image._id
     fsDelete(path.join('public', image.path))
     const result = await image.deleteOne()
 
