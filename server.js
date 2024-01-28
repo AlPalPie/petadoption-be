@@ -10,11 +10,21 @@ const cors = require('cors')
 const corsOptions = require('./config/corsOptions')
 const connectDB = require('./config/dbConn')
 const mongoose = require('mongoose')
+const fs = require('fs')
 const PORT = process.env.PORT || 3500
 
 console.log(process.env.NODE_ENV)
 
 connectDB()
+
+// create directories for file upload
+fs.mkdir('public/images', { recursive: true }, (err) => {
+    if (err) {
+      console.error('Error creating directory:', err);
+    } else {
+      console.log('Directory created successfully!');
+    }
+});
 
 // my own custom logging middleware
 app.use(logger)
