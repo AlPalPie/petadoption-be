@@ -100,9 +100,9 @@ AWS_BUCKET_NAME=<S3 bucket name : I used AWS S3 for cloud object storage, you ca
 
 AWS_BUCKET_REGION=<S3 bucket region>
 
-AWS_ACCESS_KEY=<S3 bucket access key>
+AWS_ACCESS_KEY_ID=<S3 bucket access key>
 
-AWS_SECRET_KEY<S3 bucket secret key>
+AWS_SECRET_ACCESS_KEY=<S3 bucket secret key>
 ```
 You can use something like this to generate the JWT token keys (using NodeJS):
 ```

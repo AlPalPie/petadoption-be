@@ -55,8 +55,11 @@ const createNewAnimal = async (req, res) => {
         // delete image stored in server now that it is in S3
         fsDelete(req.file.path)
 
+        // Construct S3 URL path manually
+        const urlPath = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${req.file.filename}`
+
         // Create the new Image document
-        image = await Image.create( { animal: animal._id, path: s3Result.Location, caption })
+        image = await Image.create( { animal: animal._id, path: urlPath, caption })
     } else {
         image = null
     }
@@ -99,8 +102,11 @@ const updateAnimal = async (req, res) => {
         // delete image stored in server now that it is in S3
         fsDelete(req.file.path)
 
+        // Construct S3 URL path manually
+        const urlPath = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${req.file.filename}`
+
         // Create the new Image document
-        image = await Image.create( { animal: animal._id, path: s3Result.Location, caption: '' })
+        image = await Image.create( { animal: animal._id, path: urlPath, caption: '' })
     } else {
         image = null
     }
@@ -143,7 +149,8 @@ const deleteAnimal = async (req, res) => {
 
     if (images) {
         for (const image of images) {
-            fsDelete(path.join('public', image.path))
+            // Delete image in S3
+            const s3Result = await deleteS3Object(image.path)
             await image.deleteOne()
         }
     }

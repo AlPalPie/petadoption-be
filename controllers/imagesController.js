@@ -39,8 +39,11 @@ const createNewImage = async (req, res) => {
     // delete image stored in server now that it is in S3
     fsDelete(req.file.path)
 
+    // Construct S3 URL path manually
+    const urlPath = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_BUCKET_REGION}.amazonaws.com/${req.file.filename}`
+
     // Create and store the new image
-    const image = await Image.create( { animal: animalID, path: s3Result.Location, caption })
+    const image = await Image.create( { animal: animalID, path: urlPath, caption })
 
     if (image) { // Created 
         return res.status(201).json({ message: 'New image created' })

@@ -1,19 +1,16 @@
 const multer = require('multer')
 const path = require('path')
 const fs = require('fs')
-const S3 = require('aws-sdk/clients/S3')
-
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3')
+const { fromEnv } = require ('@aws-sdk/credential-providers')
 
 const bucketName = process.env.AWS_BUCKET_NAME
 const region  = process.env.AWS_BUCKET_REGION
-const accessKeyId  = process.env.AWS_ACCESS_KEY
-const secretAccessKey  = process.env.AWS_SECRET_KEY
 
 
-const s3 = new S3({
-    region,
-    accessKeyId,
-    secretAccessKey
+const s3 = new S3Client({
+    credentials: fromEnv(),
+    region
 })
 
 class FileTypeError extends Error {
@@ -64,6 +61,7 @@ const uploadFileToServer = (req, res, next) => {
             console.log(`Unknown error occured with error: ${err}`)
         }
         // Everything went fine. 
+        console.log(req.file)
         next()
     })
 }
@@ -71,22 +69,25 @@ const uploadFileToServer = (req, res, next) => {
 const uploadS3Object = (file) => {
     const fileStream = fs.createReadStream(file.path)
 
-    const uploadParams = {
+    const uploadCommand = new PutObjectCommand({
         Bucket: bucketName,
-        Body: fileStream,
-        Key: file.filename
-    }
+        Key: file.filename,
+        Body: fileStream
+    })
 
-    return s3.upload(uploadParams).promise()
+    return s3.send(uploadCommand)
 }
 
-const deleteS3Object = (key) => {
-    const deleteParams = {
+const deleteS3Object = (fullpath) => {
+
+    const key = path.basename(fullpath)
+
+    const deleteCommand = new DeleteObjectCommand({
         Bucket: bucketName,
         Key: key
-    }
+    })
 
-    return s3.deleteObject(deleteParams).promise()
+    return s3.send(deleteCommand)
 }
 
 
