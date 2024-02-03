@@ -1,19 +1,9 @@
 const Animal = require('../models/Animal')
 const Image = require('../models/Image')
-const fs = require('fs')
 const path = require('path')
+const { uploadS3Object, deleteS3Object, fsDelete } = require('../middleware/uploadFile')
 
 
-// Helper function to delete files from filesystem
-const fsDelete = (path) => {
-    fs.unlink(path, (err) => {
-        if (err) {
-            console.log('Error deleting file:', err)
-            return
-        }
-        console.log(`File ${path} successfully deleted.`)
-    })
-}
 
 
 // @desc Get all animals 
@@ -59,9 +49,14 @@ const createNewAnimal = async (req, res) => {
 
     let image;
     if (req.file) {
-        const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
-        // Create and store the new image
-        image = await Image.create( { animal: animal._id, path: urlPath, caption })
+        // upload image to S3
+        const s3Result = await uploadS3Object(req.file)
+        console.log(s3Result)
+        // delete image stored in server now that it is in S3
+        fsDelete(req.file.path)
+
+        // Create the new Image document
+        image = await Image.create( { animal: animal._id, path: s3Result.Location, caption })
     } else {
         image = null
     }
@@ -98,9 +93,14 @@ const updateAnimal = async (req, res) => {
 
     let image;
     if (req.file) {
-        const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
-        // Create and store the new image
-        image = await Image.create( { animal: animal._id, path: urlPath, caption: '' })
+        // upload image to S3
+        const s3Result = await uploadS3Object(req.file)
+        console.log(s3Result)
+        // delete image stored in server now that it is in S3
+        fsDelete(req.file.path)
+
+        // Create the new Image document
+        image = await Image.create( { animal: animal._id, path: s3Result.Location, caption: '' })
     } else {
         image = null
     }

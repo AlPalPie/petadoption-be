@@ -1,6 +1,20 @@
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs')
+const S3 = require('aws-sdk/clients/S3')
 
+
+const bucketName = process.env.AWS_BUCKET_NAME
+const region  = process.env.AWS_BUCKET_REGION
+const accessKeyId  = process.env.AWS_ACCESS_KEY
+const secretAccessKey  = process.env.AWS_SECRET_KEY
+
+
+const s3 = new S3({
+    region,
+    accessKeyId,
+    secretAccessKey
+})
 
 class FileTypeError extends Error {
     constructor(message) {
@@ -32,7 +46,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const uploadFile = (req, res, next) => {
+const uploadFileToServer = (req, res, next) => {
     const upload = multer({
         storage: storage,
         fileFilter: fileFilter,
@@ -54,5 +68,38 @@ const uploadFile = (req, res, next) => {
     })
 }
 
+const uploadS3Object = (file) => {
+    const fileStream = fs.createReadStream(file.path)
 
-module.exports = uploadFile
+    const uploadParams = {
+        Bucket: bucketName,
+        Body: fileStream,
+        Key: file.filename
+    }
+
+    return s3.upload(uploadParams).promise()
+}
+
+const deleteS3Object = (key) => {
+    const deleteParams = {
+        Bucket: bucketName,
+        Key: key
+    }
+
+    return s3.deleteObject(deleteParams).promise()
+}
+
+
+// Helper function to delete files from filesystem
+const fsDelete = (path) => {
+    fs.unlink(path, (err) => {
+        if (err) {
+            console.log('Error deleting file:', err)
+            return
+        }
+        console.log(`File ${path} successfully deleted.`)
+    })
+}
+
+
+module.exports = { uploadFileToServer, uploadS3Object, deleteS3Object, fsDelete }

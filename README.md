@@ -1,12 +1,16 @@
 # Hosted
-TBD
+```
+https://amazinganimaladoptionagency-api.onrender.com
+```
 
 
 # Pet Adoption Website Using the MERN Stack
 
 
 This is the backend API for a mock pet adoption website. The accompanying frontend static website code is here:
-> https://github.com/AlPalPie/petadoption-fe
+```
+https://github.com/AlPalPie/petadoption-fe
+```
 
 Users can view profiles and pictures of animals added by other users.
 Users must create an account and login in order to be able to add, update, or delete animals or images.
@@ -26,6 +30,7 @@ I built this app to showcase those lovely cats! But also to mimic a pet adoption
 - User authentication and authorization using JSON Web Tokens (JWT)
 - Frontend global state management using Redux and React
 - Support for uploading image files (JPEG/PNG) through multipart form data using the multer middleware package
+- Cloud object storage using Amazon AWS S3
 
 
 
@@ -37,10 +42,17 @@ I built this app to showcase those lovely cats! But also to mimic a pet adoption
 npm install
 ```
 
-### The current code is setup for actual deployment, hosted at:
+### The current code for this web API is setup for actual deployment, hosted at:
 ```
-TBD
+https://amazinganimaladoptionagency-api.onrender.com
 ```
+
+With the frontend client which uses the above web API at:
+```
+https://amazinganimaladoptionagency.onrender.com
+```
+
+
 
 
 To run the app:
@@ -83,8 +95,16 @@ DATABASE_URI=<the access key to your database, provided when setting up your dat
 ACCESS_TOKEN_SECRET=<key used for JWT access tokens>
 
 REFRESH_TOKEN_SECRET=<key used for JWT refresh tokens>
+
+AWS_BUCKET_NAME=<S3 bucket name : I used AWS S3 for cloud object storage, you can use your own method for image storage>
+
+AWS_BUCKET_REGION=<S3 bucket region>
+
+AWS_ACCESS_KEY=<S3 bucket access key>
+
+AWS_SECRET_KEY<S3 bucket secret key>
 ```
-You can use something like this to generate the secret token keys (using NodeJS):
+You can use something like this to generate the JWT token keys (using NodeJS):
 ```
 require('crypto').randomBytes(64).toString('hex')
 ```

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const imagesController = require('../controllers/imagesController')
 const verifyJWT = require('../middleware/verifyJWT')
-const uploadFile = require('../middleware/uploadFile')
+const { uploadFileToServer } = require('../middleware/uploadFile')
 
 router.route('/')
     .get(imagesController.getAllImages)
@@ -11,7 +11,7 @@ router.route('/')
 router.use(verifyJWT)
 
 router.route('/')
-    .post(uploadFile, imagesController.createNewImage)
+    .post(uploadFileToServer, imagesController.createNewImage)
     .patch(imagesController.updateImage)
     .delete(imagesController.deleteImage)
 

@@ -1,18 +1,6 @@
 const Image = require('../models/Image')
-const fs = require('fs')
 const path = require('path')
-
-
-// Helper function to delete files from filesystem
-const fsDelete = (path) => {
-    fs.unlink(path, (err) => {
-        if (err) {
-            console.log('Error deleting file:', err)
-            return
-        }
-        console.log(`File ${path} successfully deleted.`)
-    })
-}
+const { uploadS3Object, deleteS3Object, fsDelete } = require('../middleware/uploadFile')
 
 
 // @desc Get all images 
@@ -44,11 +32,15 @@ const createNewImage = async (req, res) => {
         return res.status(400).json({ message: 'animalID and caption fields and image file are required' })
     }
 
-    const urlPath = path.join(path.basename(path.dirname(req.file.path)), path.basename(req.file.path))
-    console.log(`urlPath = ${urlPath}`)
+
+    // upload image to S3
+    const s3Result = await uploadS3Object(req.file)
+    console.log(s3Result)
+    // delete image stored in server now that it is in S3
+    fsDelete(req.file.path)
 
     // Create and store the new image
-    const image = await Image.create( { animal: animalID, path: urlPath, caption })
+    const image = await Image.create( { animal: animalID, path: s3Result.Location, caption })
 
     if (image) { // Created 
         return res.status(201).json({ message: 'New image created' })
@@ -105,7 +97,11 @@ const deleteImage = async (req, res) => {
         return res.status(400).json({ message: 'Image not found' })
     }
 
-    fsDelete(path.join('public', image.path))
+    // Delete image in S3
+    const s3Result = await deleteS3Object(image.path)
+    console.log(s3Result)
+
+    // Delete Image document in MongoDB
     const result = await image.deleteOne()
 
     const reply = `Image with ID ${id} deleted`
