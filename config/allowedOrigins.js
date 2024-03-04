@@ -1,6 +1,8 @@
-// DEPLOY: modify these origins for deployment
-// removed 'http://localhost:3000' for deployment
-// added 'https://amazinganimaladoptionagency.onrender.com' for deployment
+// Use this for DEVELOPMENT:
+//  'http://localhost:3000'
+// Use this for PRODUCTION:
+//  'https://amazinganimaladoptionagency.onrender.com'
+
 const allowedOrigins = [
     'https://amazinganimaladoptionagency.onrender.com'
 ]

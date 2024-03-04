@@ -15,4 +15,7 @@ router.route('/')
     .patch(usersController.updateUser)
     .delete(usersController.deleteUser)
 
+router.route('/favorites')
+    .patch(usersController.updateUserFavorites)
+
 module.exports = router

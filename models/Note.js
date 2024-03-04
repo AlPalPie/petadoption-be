@@ -8,6 +8,11 @@ const noteSchema = new mongoose.Schema(
             required: true,
             ref: 'User'
         },
+        animal: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'Animal'
+        },
         title: {
             type: String,
             required: true
@@ -16,10 +21,6 @@ const noteSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        completed: {
-            type: Boolean,
-            default: false
-        }
     },
     {
         timestamps: true

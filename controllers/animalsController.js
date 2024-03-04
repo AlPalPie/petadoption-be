@@ -1,5 +1,6 @@
 const Animal = require('../models/Animal')
 const Image = require('../models/Image')
+const User = require('../models/User')
 const path = require('path')
 const { uploadS3Object, deleteS3Object, fsDelete } = require('../middleware/uploadFile')
 
@@ -152,6 +153,24 @@ const deleteAnimal = async (req, res) => {
             // Delete image in S3
             const s3Result = await deleteS3Object(image.path)
             await image.deleteOne()
+        }
+    }
+
+    // Find all users who have favorited this animal
+    const users = await User.find({ favorites: { $in: [animal._id] } }).exec()
+
+    if (users) {
+        // Delete the animal from every user's favorites
+        for (const user of users) {
+            let favorites = user.favorites
+            const index = favorites.indexOf(animal._id)
+            if (index !== -1) {
+                favorites.splice(index, 1)
+            } else {
+                console.log("Error: we shouldnt get here if the animal id is part of favorites.")
+            }
+            user.favorites = favorites
+            const updatedUser = await user.save()
         }
     }
 

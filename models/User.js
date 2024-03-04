@@ -17,10 +17,14 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    animals: {
-        type: [mongoose.Schema.Types.ObjectId],
+    favorites: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Animal'
-    },
+    }],
+    applied: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Animal'
+    }],
 })
 
 module.exports = mongoose.model('User', userSchema)

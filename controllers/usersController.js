@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const Note = require('../models/Note')
 const bcrypt = require('bcrypt')
+const Animal = require('../models/Animal')
 
 // @desc Get all users
 // @route GET /users
@@ -126,9 +127,53 @@ const deleteUser = async (req, res) => {
     res.json(reply)
 }
 
+// @desc Update a user's list of favorite animals ; if animal already favorited it will be removed
+// @route PATCH /users/favorites
+// @access Private
+const updateUserFavorites = async (req, res) => {
+    const { userId, animalId } = req.body
+
+    // Confirm data 
+    if (!userId || !animalId) {
+        return res.status(400).json({ message: 'All fields are required' })
+    }
+
+    // Does the user exist to update?
+    const user = await User.findById(userId).exec()
+    if (!user) {
+        return res.status(400).json({ message: 'User not found' })
+    }
+
+    // Does the animal exist to update?
+    const animal = await Animal.findById(animalId).exec()
+    if (!animal) {
+        return res.status(400).json({ message: 'Aniimal not found' })
+    }
+
+    let favorites = user.favorites
+
+    const index = favorites.indexOf(animalId)
+    if (index !== -1) {
+        favorites.splice(index, 1)
+    } else {
+        favorites.push(animalId)
+    }
+    
+    user.favorites = favorites
+
+    const updatedUser = await user.save()
+
+    if (index !== -1) {
+        res.json({ message: `${updatedUser.username} updated by removing ${animal.name} from its Favorites.` })
+    } else {
+        res.json({ message: `${updatedUser.username} updated by adding ${animal.name} to its Favorites.` })
+    }
+}
+
 module.exports = {
     getAllUsers,
     createNewUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    updateUserFavorites
 }

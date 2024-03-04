@@ -25,18 +25,19 @@ const login = async (req, res) => {
     const accessToken = jwt.sign(
         {
             "UserInfo": {
+                "id": foundUser._id,
                 "username": foundUser.username,
                 "roles": foundUser.roles
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: '1m' }
     )
 
     const refreshToken = jwt.sign(
         { "username": foundUser.username },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '10m' }
     )
 
     // Create secure cookie with refresh token 
@@ -68,18 +69,19 @@ const refresh = (req, res) => {
             if (err) return res.status(403).json({ message: 'Forbidden' })
 
             const foundUser = await User.findOne({ username: decoded.username }).exec()
-
             if (!foundUser) return res.status(401).json({ message: 'Unauthorized' })
 
+            // FIXME: Probably not secure to send user id; research more on this topic
             const accessToken = jwt.sign(
                 {
                     "UserInfo": {
+                        "id": foundUser._id,
                         "username": foundUser.username,
                         "roles": foundUser.roles
                     }
                 },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '15m' }
+                { expiresIn: '1m' }
             )
 
             res.json({ accessToken })

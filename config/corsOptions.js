@@ -2,7 +2,10 @@ const allowedOrigins = require('./allowedOrigins')
 
 const corsOptions = {
     origin: (origin, callback) => {
-        // DEPLOY: removed "|| !origin" from the if condition so that apps like Postman dont have access to the backend
+        // Use this for DEVELOPMENT so that apps like Postman have access to the backend:
+        //         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        // Use this for PRODUCTION:
+        //         if (allowedOrigins.indexOf(origin) !== -1) {
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
